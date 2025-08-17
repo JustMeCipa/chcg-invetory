@@ -1,0 +1,1052 @@
+/* ================================
+   CHCG INVENTORY - OCEAN BLUE THEME
+   Stânga: 7x6 grid, Dreapta: Equipment
+   ================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: transparent;
+    color: #ffffff;
+    overflow: hidden;
+    user-select: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ================================
+   COLOR VARIABLES - OCEAN BLUE
+   ================================ */
+
+:root {
+    --ocean-blue: #0ea5e9;
+    --ocean-dark: #0284c7;
+    --ocean-light: #38bdf8;
+    --ocean-bg: rgba(14, 165, 233, 0.15);
+    --ocean-border: rgba(14, 165, 233, 0.3);
+    --grey-transparent: rgba(71, 85, 105, 0.8);
+    --grey-dark: rgba(51, 65, 85, 0.9);
+    --grey-light: rgba(148, 163, 184, 0.6);
+    --accent-cyan: #06b6d4;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+}
+
+/* ================================
+   HOTBAR (BOTTOM CENTER)
+   ================================ */
+
+.hotbar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    background: var(--grey-transparent);
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--ocean-border);
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.hotbar-slot {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    background: var(--grey-dark);
+    border: 2px solid var(--grey-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.hotbar-slot:hover,
+.hotbar-slot.occupied {
+    border-color: var(--ocean-blue);
+    background: var(--ocean-bg);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+}
+
+.hotbar-key {
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ocean-light);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.item-icon {
+    width: 36px;
+    height: 36px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.item-amount {
+    position: absolute;
+    bottom: 3px;
+    right: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 2px 4px;
+    border-radius: 3px;
+    display: none;
+}
+
+/* ================================
+   MAIN INVENTORY CONTAINER
+   ================================ */
+
+.inventory-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+}
+
+.inventory-container.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.inventory-wrapper {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+/* ================================
+   LEFT SIDE - MAIN INVENTORY
+   ================================ */
+
+.main-inventory-panel {
+    background: linear-gradient(145deg, var(--grey-transparent), var(--grey-dark));
+    border: 2px solid var(--ocean-border);
+    border-radius: 16px;
+    width: 500px;
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+.inventory-header {
+    background: linear-gradient(135deg, var(--ocean-dark), var(--ocean-blue));
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.header-title i {
+    color: var(--accent-cyan);
+    font-size: 20px;
+}
+
+.inventory-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+}
+
+.weight-display,
+.slots-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.weight-display i,
+.slots-display i {
+    color: var(--accent-cyan);
+    font-size: 11px;
+}
+
+/* ================================
+   7x6 INVENTORY GRID
+   ================================ */
+
+.main-inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 6px;
+    padding: 20px;
+    background: var(--grey-transparent);
+    height: 420px;
+}
+
+.inventory-slot {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    background: var(--grey-dark);
+    border: 2px solid var(--grey-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.inventory-slot:hover {
+    border-color: var(--ocean-blue);
+    background: var(--ocean-bg);
+    transform: scale(1.05);
+}
+
+.inventory-slot.occupied {
+    background: linear-gradient(145deg, var(--ocean-bg), rgba(14, 165, 233, 0.25));
+    border-color: var(--ocean-blue);
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.2);
+}
+
+.inventory-slot.drag-over {
+    border-color: #fbbf24;
+    background: rgba(251, 191, 36, 0.2);
+    border-style: dashed;
+    animation: pulse 1s infinite;
+}
+
+.slot-item {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slot-item-image {
+    width: 44px;
+    height: 44px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+/* Placeholder styles pentru imagini lipsă */
+.slot-item-image[data-item*="weapon"] {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+}
+
+.slot-item-image[data-item*="food"] {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+}
+
+.slot-item-image[data-item*="drink"] {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+}
+
+.slot-item-amount {
+    position: absolute;
+    bottom: 2px;
+    right: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 2px 4px;
+    border-radius: 3px;
+    line-height: 1;
+}
+
+/* ================================
+   RIGHT SIDE - EQUIPMENT PANEL
+   ================================ */
+
+.equipment-panel {
+    background: linear-gradient(145deg, var(--grey-transparent), var(--grey-dark));
+    border: 2px solid var(--ocean-border);
+    border-radius: 16px;
+    width: 320px;
+    padding: 20px;
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* ================================
+   PLAYER AVATAR SECTION
+   ================================ */
+
+.player-section {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
+.player-avatar {
+    width: 160px;
+    height: 240px;
+    background: linear-gradient(145deg, var(--ocean-bg), rgba(14, 165, 233, 0.05));
+    border: 2px solid var(--ocean-border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.avatar-outline {
+    width: 120px;
+    height: 200px;
+    opacity: 0.4;
+}
+
+.player-figure {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 10px rgba(14, 165, 233, 0.3));
+}
+
+/* ================================
+   EQUIPMENT SLOTS
+   ================================ */
+
+.equipment-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.equipment-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.equipment-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.equipment-slot {
+    width: 80px;
+    height: 80px;
+    background: var(--grey-dark);
+    border: 2px solid var(--grey-light);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.equipment-slot:hover {
+    border-color: var(--ocean-blue);
+    background: var(--ocean-bg);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+}
+
+.equipment-slot.occupied {
+    background: linear-gradient(145deg, var(--ocean-bg), rgba(14, 165, 233, 0.25));
+    border-color: var(--ocean-blue);
+}
+
+.slot-icon {
+    width: 64px;
+    height: 64px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* ================================
+   WEAPON SECTION
+   ================================ */
+
+.weapon-section {
+    border-top: 1px solid var(--ocean-border);
+    padding-top: 16px;
+}
+
+.section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ocean-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.weapon-slots {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.weapon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+
+.weapon-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.weapon-slot {
+    width: 100px;
+    height: 70px;
+    background: var(--grey-dark);
+    border: 2px solid var(--grey-light);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.weapon-slot:hover {
+    border-color: var(--ocean-blue);
+    background: var(--ocean-bg);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+}
+
+.weapon-slot.occupied {
+    background: linear-gradient(145deg, var(--ocean-bg), rgba(14, 165, 233, 0.25));
+    border-color: var(--ocean-blue);
+}
+
+/* ================================
+   QUICKSLOTS SECTION
+   ================================ */
+
+.quickslots-section {
+    border-top: 1px solid var(--ocean-border);
+    padding-top: 16px;
+}
+
+.quickslots {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.quickslot-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.quickslot-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 120px;
+    text-align: left;
+}
+
+.quickslot {
+    width: 60px;
+    height: 60px;
+    background: var(--grey-dark);
+    border: 2px solid var(--grey-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.quickslot:hover {
+    border-color: var(--ocean-blue);
+    background: var(--ocean-bg);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+}
+
+.quickslot.occupied {
+    background: linear-gradient(145deg, var(--ocean-bg), rgba(14, 165, 233, 0.25));
+    border-color: var(--ocean-blue);
+}
+
+.slot-key {
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--ocean-light);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+
+/* ================================
+   SECONDARY INVENTORY
+   ================================ */
+
+.secondary-inventory {
+    background: linear-gradient(145deg, var(--grey-transparent), var(--grey-dark));
+    border: 2px solid var(--ocean-border);
+    border-radius: 16px;
+    width: 400px;
+    margin-left: 24px;
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6);
+}
+
+.secondary-header {
+    background: linear-gradient(135deg, var(--ocean-dark), var(--ocean-blue));
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.secondary-stats {
+    display: flex;
+    align-items: center;
+}
+
+.secondary-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* ================================
+   CLOSE BUTTON
+   ================================ */
+
+.close-button {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3000;
+}
+
+.close-btn {
+    padding: 12px 24px;
+    background: linear-gradient(145deg, #ef4444, #dc2626);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3);
+}
+
+.close-btn:hover {
+    background: linear-gradient(145deg, #dc2626, #b91c1c);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(239, 68, 68, 0.4);
+}
+
+/* ================================
+   CONTEXT MENU
+   ================================ */
+
+.context-menu {
+    position: fixed;
+    background: var(--grey-dark);
+    border: 2px solid var(--ocean-border);
+    border-radius: 10px;
+    padding: 8px 0;
+    min-width: 160px;
+    z-index: 4000;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transition: all 0.3s ease;
+}
+
+.context-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+.context-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.context-item:hover {
+    background: var(--ocean-bg);
+    color: var(--ocean-light);
+}
+
+.context-item i {
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+    color: var(--ocean-blue);
+}
+
+/* ================================
+   MODALS
+   ================================ */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+}
+
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: linear-gradient(145deg, var(--grey-dark), var(--grey-transparent));
+    border: 2px solid var(--ocean-border);
+    border-radius: 16px;
+    max-width: 450px;
+    min-width: 350px;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.8);
+    transform: scale(0.9);
+    transition: transform 0.4s ease;
+    overflow: hidden;
+}
+
+.modal.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--ocean-dark), var(--ocean-blue));
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.close-modal {
+    font-size: 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.3s ease;
+    font-weight: 300;
+}
+
+.close-modal:hover {
+    color: #ef4444;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+/* ================================
+   FORM STYLES
+   ================================ */
+
+.give-form,
+.drop-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.give-form label,
+.drop-form label {
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.give-form input,
+.drop-form input {
+    padding: 12px 16px;
+    background: var(--grey-dark);
+    border: 2px solid var(--grey-light);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.give-form input:focus,
+.drop-form input:focus {
+    outline: none;
+    border-color: var(--ocean-blue);
+    background: var(--ocean-bg);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: linear-gradient(145deg, var(--ocean-blue), var(--ocean-dark));
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(145deg, var(--ocean-dark), #0369a1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(14, 165, 233, 0.3);
+}
+
+.btn-secondary {
+    background: var(--grey-light);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--grey-dark);
+    transform: translateY(-2px);
+}
+
+/* ================================
+   ITEM INFO MODAL
+   ================================ */
+
+.item-image {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.item-image img {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    border: 2px solid var(--ocean-border);
+    background: var(--grey-dark);
+    padding: 8px;
+}
+
+.item-details p {
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.item-details strong {
+    color: var(--ocean-light);
+    font-weight: 700;
+}
+
+/* ================================
+   QUALITY INDICATORS
+   ================================ */
+
+.slot-item[data-quality="common"] {
+    border: 1px solid var(--grey-light);
+}
+
+.slot-item[data-quality="uncommon"] {
+    border: 2px solid #4ade80;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+}
+
+.slot-item[data-quality="rare"] {
+    border: 2px solid #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.slot-item[data-quality="epic"] {
+    border: 2px solid #a855f7;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+.slot-item[data-quality="legendary"] {
+    border: 2px solid #f59e0b;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.main-inventory-panel {
+    animation: slideInLeft 0.5s ease;
+}
+
+.equipment-panel {
+    animation: slideInRight 0.5s ease;
+}
+
+.secondary-inventory {
+    animation: slideInLeft 0.5s ease;
+}
+
+/* ================================
+   SCROLLBAR STYLING
+   ================================ */
+
+.equipment-panel::-webkit-scrollbar,
+.secondary-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.equipment-panel::-webkit-scrollbar-track,
+.secondary-grid::-webkit-scrollbar-track {
+    background: var(--grey-dark);
+    border-radius: 4px;
+}
+
+.equipment-panel::-webkit-scrollbar-thumb,
+.secondary-grid::-webkit-scrollbar-thumb {
+    background: var(--ocean-blue);
+    border-radius: 4px;
+}
+
+.equipment-panel::-webkit-scrollbar-thumb:hover,
+.secondary-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--ocean-dark);
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+
+@media (max-width: 1400px) {
+    .inventory-wrapper {
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+    }
+    
+    .secondary-inventory {
+        margin-left: 0;
+        width: 500px;
+    }
+    
+    .main-inventory-panel {
+        width: 460px;
+    }
+    
+    .equipment-panel {
+        width: 300px;
+    }
+}
+
+@media (max-width: 1000px) {
+    .main-inventory-grid {
+        grid-template-columns: repeat(6, 1fr);
+        height: 360px;
+    }
+    
+    .secondary-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+    
+    .main-inventory-panel,
+    .secondary-inventory {
+        width: 420px;
+    }
+}
+
+@media (max-width: 800px) {
+    .main-inventory-grid {
+        grid-template-columns: repeat(5, 1fr);
+        height: 300px;
+    }
+    
+    .inventory-slot,
+    .quickslot {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .equipment-slot {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .weapon-slot {
+        width: 80px;
+        height: 60px;
+    }
+    
+    .hotbar-slot {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .equipment-panel {
+        width: 260px;
+        padding: 16px;
+    }
+    
+    .player-avatar {
+        width: 140px;
+        height: 200px;
+    }
+}
+
+/* ================================
+   UTILITY CLASSES
+   ================================ */
+
+.glow-effect {
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.5);
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
